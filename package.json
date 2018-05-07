@@ -1,0 +1,10 @@
+{
+  "name": "performance-tester",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Thomas Allmer <d4kmor@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@webcomponents/webcomponentsjs": "^1.2.0"
+  }
+}
