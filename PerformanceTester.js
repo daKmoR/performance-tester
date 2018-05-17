@@ -7,8 +7,55 @@ class PerformanceTester {
     });
   }
 
+  /**
+   *  1-10;11-20[2,5];20-100[1,30]
+   *
+   *  will result in something like this
+   *
+   *    this.patchRuns = [
+   *      { repeats: 2, multiplyHtml: 10, },
+   *      { repeats: 2, multiplyHtml: 20, }
+   *    ];
+   */
+  set sequence(sequence) {
+    this.__sequence = sequence;
+
+    let newPatchRuns = [];
+    let parts = this.__sequence.split(';');
+    parts.forEach((rawPart) => {
+      let repeats = 1;
+      let multiplySpread = -1;
+      let part = rawPart;
+      if (part.indexOf('[') !== -1) {
+        let options = part.substring(part.indexOf('[') + 1, part.indexOf(']'));
+        [repeats, multiplySpread] = options.split(',');
+        repeats = parseInt(repeats);
+        multiplySpread = parseInt(multiplySpread);
+        part = part.substring(0, part.indexOf('['));
+      }
+      let [start, end] = part.split('-');
+      start = parseInt(start);
+      end = parseInt(end);
+
+      let i = start;
+      multiplySpread = multiplySpread === -1 ? end : multiplySpread;
+      let step = (end - start + 1) / multiplySpread;
+      while(i <= end) {
+        newPatchRuns.push({repeats, multiplyHtml: Math.floor(i)});
+        i += step;
+      }
+    });
+
+    this.patchRuns = newPatchRuns;
+  }
+
+  get sequence() {
+    return this.__sequence;
+  }
+
   constructor(rootNode) {
     this.running = false;
+    this.sequence = '1-10;11-20[2,5];20-100[1,30]';
     this.tests = [];
     rootNode.innerHTML = `
       <h1>Tester</h1>
@@ -58,14 +105,7 @@ class PerformanceTester {
   }
 
   add(test) {
-    // if (!data.sequence) {
-    //   this.sequence = ['3x1', '3x3', '3x5'];
-    // }
     test.trace = this.tests.length;
-    // test.runs = [
-    //   { repeats: 2, multiplyHtml: 10, },
-    //   { repeats: 2, multiplyHtml: 20, }
-    // ];
     this.tests.push(test);
   }
 
@@ -91,11 +131,6 @@ class PerformanceTester {
   }
   
   async executeSuite() {
-    this.patchRuns = [
-      { repeats: 2, multiplyHtml: 10, },
-      { repeats: 2, multiplyHtml: 20, }
-    ];
-
     for (let i = 0; i < this.tests.length; i += 1) {
       this.tests[i].results = await this.executePatch(this.tests[i], this.patchRuns);
       console.log(this.tests[i].results);

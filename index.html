@@ -13,11 +13,9 @@
   <div id="tester"></div> 
   <script>
     const tester = new WcPerformanceTester(document.querySelector('#tester'));
-    // tester.setOptions({
-    //   // runs: '1-10[3,10]'
+    // tester.sequence = '1-10;11-20[2,5];20-100[1,30]';
+    tester.sequence = '1-10[1,-1];11-30[1,5]';
 
-    // });
-    tester.runs = [1, 3, 5, 10];
     tester.add({
       name: 'Reference Element',
       initHtml: `
