@@ -1,0 +1,11 @@
+<script>
+  class PerformaceEnd extends HTMLElement {
+    connectedCallback() {
+      this.dispatchEvent(new CustomEvent('PerformanceTesterEnd', {
+        bubbles: true,
+        composed: true,
+      }));
+    }
+  }
+  customElements.define('performance-end', PerformaceEnd);
+</script>

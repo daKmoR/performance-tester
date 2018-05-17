@@ -4,93 +4,41 @@
   <meta charset="utf-8">
   <title>Performance Tester</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="./node_modules/babel-polyfill/dist/polyfill.min.js"></script>
+
   <script src="./PerformanceTester.js"></script>
+  <script src="./WcPerformanceTester.js"></script>
 </head>
 <body>
   <div id="tester"></div> 
   <script>
-    const tester = new PerformanceTester(document.querySelector('#tester'));
+    const tester = new WcPerformanceTester(document.querySelector('#tester'));
     // tester.setOptions({
     //   // runs: '1-10[3,10]'
 
     // });
     tester.runs = [1, 3, 5, 10];
     tester.add({
-      name: 'Math.random()*10',
-      initFunction: () => {
-
-      },
+      name: 'Reference Element',
       initHtml: `
-        <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js"><\/script>
-        <script>
-          class ReferenceElement extends HTMLElement {
-            sleep(milliseconds) {
-              var start = new Date().getTime();
-              for (var i = 0; i < 1e7; i++) {
-                if ((new Date().getTime() - start) > milliseconds){
-                  break;
-                }
-              }
-            }
-            constructor() {
-              super();
-              this.attachShadow({mode: 'open'});
-            }
-            connectedCallback() {
-              this.shadowRoot.innerHTML = '<h1>In Shadow Dom</h1><slot></slot>'
-              this.innerHTML = '<p>In Light Dom</p>';
-              this.sleep(Math.random()*10);
-            }
-          }
-          customElements.define('reference-element', ReferenceElement);
-        <\/script>
+        <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js"></${'script'}>
+        <link rel="import" href="./reference-element.html">
       `,
-      startFunction: () => {
-
-      },
       testHtml: `
         <reference-element></reference-element>
-      `
+      `,
     });
 
     tester.add({
-      name: 'Sleep 10',
-      initFunction: () => {
-
-      },
+      name: 'Math.random()*10',
       initHtml: `
-        <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js"><\/script>
-        <script>
-          class ReferenceElement extends HTMLElement {
-            sleep(milliseconds) {
-              var start = new Date().getTime();
-              for (var i = 0; i < 1e7; i++) {
-                if ((new Date().getTime() - start) > milliseconds){
-                  break;
-                }
-              } 
-            }            
-            constructor() {
-              super();
-              this.attachShadow({mode: 'open'});
-            }
-            connectedCallback() {
-              this.shadowRoot.innerHTML = '<h1>In Shadow Dom</h1><slot></slot>'
-              this.innerHTML = '<p>In Light Dom</p>';
-              this.sleep(10);
-            }
-          }
-          customElements.define('reference-element', ReferenceElement);
-        <\/script>
+        <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js"></${'script'}>
+        <link rel="import" href="./random-times.html">
       `,
-      startFunction: () => {
-
-      },
       testHtml: `
-        <reference-element></reference-element>
-      `
+        <random-times></random-times>
+      `,
     });
   </script>
-
 </body>
 </html>

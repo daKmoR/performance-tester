@@ -1,0 +1,22 @@
+<script>
+  class RandomTimes extends HTMLElement {
+    sleep(milliseconds) {
+      var start = new Date().getTime();
+      for (var i = 0; i < 1e7; i++) {
+        if ((new Date().getTime() - start) > milliseconds){
+          break;
+        }
+      }
+    }
+    constructor() {
+      super();
+      this.attachShadow({mode: 'open'});
+    }
+    connectedCallback() {
+      this.shadowRoot.innerHTML = '<h1>In Shadow Dom</h1><slot></slot>'
+      this.innerHTML = '<p>In Light Dom</p>';
+      this.sleep(Math.random()*30);
+    }
+  }
+  customElements.define('random-times', RandomTimes);
+</script>

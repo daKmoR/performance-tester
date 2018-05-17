@@ -5,6 +5,7 @@
   "author": "Thomas Allmer <d4kmor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@webcomponents/webcomponentsjs": "^1.2.0"
+    "@webcomponents/webcomponentsjs": "^1.0.0",
+    "babel-polyfill": "^6.26.0"
   }
 }

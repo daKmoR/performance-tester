@@ -79,15 +79,14 @@ class PerformanceTester {
   }
 
   setupIframe() {
-    this.iframe = document.createElement('iframe');
-    document.body.appendChild(this.iframe);
-
     return new Promise((resolve) => {
+      this.iframe = document.createElement('iframe');
       this.iframe.addEventListener('load', () => {
         this.iframeWin = this.iframe.contentWindow || this.iframe;
         this.iframeDoc = this.iframe.contentDocument || this.iframeWin.document;
         resolve();
       });
+      document.body.appendChild(this.iframe);
     });
   }
   
@@ -124,24 +123,43 @@ class PerformanceTester {
     return results;
   }
 
+  testInit(test, options) {
+    return new Promise((resolve) => {
+      this.iframeDoc.open();
+
+      this.iframeDoc.addEventListener('PerformanceTesterInitDone', function() {
+        setTimeout(() => {
+          resolve();
+        }, 0);
+      });
+      this.iframeDoc.write(test.initHtml + `
+        <script>
+          document.dispatchEvent(new CustomEvent('PerformanceTesterInitDone'));
+        </${'script'}>
+      `);
+
+      this.iframeDoc.close();
+    });
+  }
+
+  testWrite(test, options) {
+    return new Promise((resolve) => {
+      this.iframeDoc.body.innerHTML = test.testHtml.repeat(options.multiplyHtml);
+      resolve();
+    });
+  }
+
   async executeSingleTest(test, options) {
     await this.setupIframe();
-    
-    this.iframeDoc.open();
-    this.iframeDoc.write(test.initHtml);
 
-    await this.constructor.timeout(100);
+    await this.testInit(test, options);
 
     let start = performance.now();
-
-    this.iframeDoc.write(test.testHtml.repeat(options.multiplyHtml));
+    await this.testWrite(test, options);
 
     let end = performance.now();
     let duration = end - start;
     // console.log(test.duration);
-
-    this.iframeDoc.close();
-
     let result = { start, end, duration };
     this.addSingleTestToGraph(result, { 
       multiplyHtml: options.multiplyHtml, 
@@ -151,7 +169,6 @@ class PerformanceTester {
 
     return result;
   }
-
   //   test.results = {
   //     10: [
   //       {
@@ -164,5 +181,4 @@ class PerformanceTester {
   //       }
   //     ]
   //   };    
-
 }
