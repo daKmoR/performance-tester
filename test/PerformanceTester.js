@@ -1,4 +1,11 @@
 describe('Performance Tester', () => {
+  it('can add tests (and they get a default trance number)', () => {
+    const perf = new PerformanceTester();
+    perf.add({ testHtml: '<div>foo</div>' });
+    expect(perf.tests.length).to.equal(1);
+    expect(perf.tests[0].trace).to.equal(0);
+  });
+
   it('can override default options as arguments', () => {
     const perf = new PerformanceTester();
     expect(perf.rootUrl).to.equal('../node_modules/@d4kmor/performance-tester');
@@ -6,7 +13,33 @@ describe('Performance Tester', () => {
     expect(perf2.rootUrl).to.equal('foo');
   });
 
-  it('can repeat a single test run multiple times', async () => {
+  it('can execute a full suite with multiple tests', async () => {
+    const perf = new PerformanceTester({sequence: '1'});
+    perf.add({ testHtml: '<div>foo</div>' });
+    await perf.executeSuite();
+    expect(Object.keys(perf.tests[0].results).length).to.equal(1);
+    expect(perf.tests[0].results['1'][0]).to.have.keys(['start', 'end', 'duration']);
+  });
+
+  it('can execute a test (which my triggers multiple test-runs)', async () => {
+    const perf = new PerformanceTester();
+    const result = await perf.executeTest({
+      testHtml: '<div>foo</div>'
+    });
+    expect(result['1'][0]).to.have.keys(['start', 'end', 'duration']);
+
+    const result2 = await perf.executeTest({
+      testHtml: '<div>foo</div>'
+    }, [
+      { repeats: 1, multiplyHtml: 1 },
+      { repeats: 1, multiplyHtml: 2 }
+    ]);
+    expect(Object.keys(result2).length).to.equal(2);
+    expect(result2['1'][0]).to.have.keys(['start', 'end', 'duration']);
+    expect(result2['2'][0]).to.have.keys(['start', 'end', 'duration']);
+  });
+
+  it('can execute multiple test-runs', async () => {
     const perf = new PerformanceTester();
     const result = await perf.executeTestRuns({
       testHtml: '<div>foo</div>'
@@ -19,7 +52,7 @@ describe('Performance Tester', () => {
     expect(result2.length).to.equal(2);
   });
 
-  describe('Single Test Run', () => {
+  describe('Test-Run', () => {
     it('creates an async iframe', (done) => {
       const perf = new PerformanceTester();
       const iFrameWait = perf.setupIframe();

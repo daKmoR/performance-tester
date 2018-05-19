@@ -88,7 +88,7 @@ class PerformanceTester {
   }
 
   add(test) {
-    test.trace = this.tests.length;
+    test.trace = test.trace || this.tests.length;
     this.tests.push(test);
   }
 
@@ -104,11 +104,10 @@ class PerformanceTester {
   async executeSuite() {
     for (let i = 0; i < this.tests.length; i += 1) {
       this.tests[i].results = await this.executeTest(this.tests[i], this.patchRuns);
-      console.log(this.tests[i].results);
     }
   }
 
-  async executeTest(test, runs) {
+  async executeTest(test, runs = [{ repeats: 1, multiplyHtml: 1 }]) {
     const results = {};
     for (let i = 0; i < runs.length; i += 1) {
       let result = await this.executeTestRuns(test, runs[i]);
