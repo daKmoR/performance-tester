@@ -215,17 +215,20 @@ export default class PerformanceTester {
       }], {});
       this.graphSetup = true;
     } else {
-      const data = {
-        x: [[options.multiplyHtml]],
-        y: [[result.duration]],
-      };
-
       if (!this.graphTraceSetup[options.trace]) {
-        data.name = options.test.name;
-        Plotly.addTraces(this.graphNode, data);
+        Plotly.addTraces(this.graphNode, {
+          x: [options.multiplyHtml],
+          y: [result.duration],
+          mode: 'lines+markers',
+          type: 'scatter',
+          name: options.test.name,
+        });
         this.graphTraceSetup[options.trace] = true;
       } else {
-        Plotly.extendTraces(this.graphNode, data, [options.trace]);
+        Plotly.extendTraces(this.graphNode, {
+          x: [[options.multiplyHtml]],
+          y: [[result.duration]],
+        }, [options.trace]);
       }
     }
   }
