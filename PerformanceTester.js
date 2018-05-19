@@ -20,14 +20,14 @@ class PerformanceTester {
   set sequence(sequence) {
     this.__sequence = sequence;
 
-    let newPatchRuns = [];
-    let parts = this.__sequence.split(';');
+    const newPatchRuns = [];
+    const parts = this.__sequence.split(';');
     parts.forEach((rawPart) => {
       let repeats = 1;
       let multiplySpread = -1;
       let part = rawPart;
       if (part.indexOf('[') !== -1) {
-        let options = part.substring(part.indexOf('[') + 1, part.indexOf(']'));
+        const options = part.substring(part.indexOf('[') + 1, part.indexOf(']'));
         [repeats, multiplySpread] = options.split(',');
         repeats = parseInt(repeats);
         multiplySpread = multiplySpread ? parseInt(multiplySpread) : -1;
@@ -38,10 +38,10 @@ class PerformanceTester {
       end = end ? parseInt(end) : start;
 
       multiplySpread = multiplySpread === -1 ? end : multiplySpread;
-      let step = Math.floor((end - start + 1) / multiplySpread);
+      const step = Math.floor((end - start + 1) / multiplySpread);
       let i = step > 1 ? start - 1 + step : start;
-      while(i <= end) {
-        newPatchRuns.push({repeats, multiplyHtml: i});
+      while (i <= end) {
+        newPatchRuns.push({ repeats, multiplyHtml: i });
         i += step;
         if (step === 0) { break; }
       }
@@ -55,10 +55,10 @@ class PerformanceTester {
   }
 
   constructor(options) {
-    let optionsWithDefaults = Object.assign({}, {
+    const optionsWithDefaults = Object.assign({}, {
       sequence: '1-10;11-20[2,5];20-100[1,30]',
       rootUrl: '../node_modules/@d4kmor/performance-tester',
-      tests: []
+      tests: [],
     }, options);
     this._running = null;
 
@@ -110,7 +110,7 @@ class PerformanceTester {
   async executeTest(test, runs = [{ repeats: 1, multiplyHtml: 1 }]) {
     const results = {};
     for (let i = 0; i < runs.length; i += 1) {
-      let result = await this.executeTestRuns(test, runs[i]);
+      const result = await this.executeTestRuns(test, runs[i]);
       results[runs[i].multiplyHtml] = result;
     }
     return results;
@@ -119,7 +119,7 @@ class PerformanceTester {
   async executeTestRuns(test, { repeats = 1, multiplyHtml = 1 } = { repeats: 1, multiplyHtml: 1 }) {
     const results = [];
     for (let i = 0; i < repeats; i += 1) {
-      let result = await this.executeTestRun(test, multiplyHtml);
+      const result = await this.executeTestRun(test, multiplyHtml);
       results.push(result);
       if (this._running === false) {
         return results;
@@ -134,17 +134,17 @@ class PerformanceTester {
     test.initHtml = test.initHtml || '';
     await this.testInit(test.initHtml);
 
-    let start = performance.now();
+    const start = performance.now();
     await this.testWrite(test.testHtml, multiplyHtml);
 
-    let end = performance.now();
-    let duration = end - start;
+    const end = performance.now();
+    const duration = end - start;
 
-    let result = { start, end, duration };
+    const result = { start, end, duration };
     this.addSingleTestToGraph(result, {
-      multiplyHtml: multiplyHtml,
+      multiplyHtml,
       trace: test.trace,
-      test
+      test,
     });
 
     return result;
@@ -166,12 +166,12 @@ class PerformanceTester {
     return new Promise((resolve) => {
       this.iframeDoc.open();
 
-      this.iframeDoc.addEventListener('PerformanceTesterInitDone', function() {
+      this.iframeDoc.addEventListener('PerformanceTesterInitDone', () => {
         setTimeout(() => {
           resolve();
         }, 0);
       });
-      this.iframeDoc.write(initHtml + `
+      this.iframeDoc.write(`${initHtml}
         <script>
           document.dispatchEvent(new CustomEvent('PerformanceTesterInitDone'));
         </${'script'}>
@@ -200,7 +200,7 @@ class PerformanceTester {
       }], {});
       this.graphSetup = true;
     } else {
-      let data = {
+      const data = {
         x: [[options.multiplyHtml]],
         y: [[result.duration]],
       };

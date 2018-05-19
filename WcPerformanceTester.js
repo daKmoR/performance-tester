@@ -10,7 +10,7 @@ class WcPerformanceTester extends PerformanceTester {
     return new Promise((resolve) => {
       this.iframeDoc.open();
 
-      this.iframeDoc.addEventListener('WebComponentsReady', function() {
+      this.iframeDoc.addEventListener('WebComponentsReady', () => {
         resolve();
       });
       this.iframeDoc.write(initHtml);
@@ -21,11 +21,11 @@ class WcPerformanceTester extends PerformanceTester {
 
   testWrite(testHtml, multiplyHtml) {
     return new Promise((resolve) => {
-      this.iframeDoc.addEventListener('PerformanceTesterEnd', function() {
+      this.iframeDoc.addEventListener('PerformanceTesterEnd', () => {
         resolve();
       });
 
-      this.iframeDoc.body.innerHTML = testHtml.repeat(multiplyHtml) + `
+      this.iframeDoc.body.innerHTML = `${testHtml.repeat(multiplyHtml)}
         <performance-end></performance-end>
       `;
     });
