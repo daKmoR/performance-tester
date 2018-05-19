@@ -4,23 +4,24 @@
   <meta charset="utf-8">
   <title>Performance Tester</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <script src="./node_modules/babel-polyfill/dist/polyfill.min.js"></script>
+  <script src="../node_modules/babel-polyfill/dist/polyfill.min.js"></script>
 
-  <script src="./PerformanceTester.js"></script>
-  <script src="./WcPerformanceTester.js"></script>
+  <script src="../PerformanceTester.js"></script>
+  <script src="../WcPerformanceTester.js"></script>
 </head>
 <body>
-  <div id="tester"></div> 
+  <div id="tester"></div>
   <script>
     const tester = new WcPerformanceTester(document.querySelector('#tester'));
+    tester.rootUrl = '../';
     // tester.sequence = '1-10;11-20[2,5];20-100[1,30]';
     tester.sequence = '1-10[1,-1];11-30[1,5]';
 
     tester.add({
       name: 'Reference Element',
       initHtml: `
-        <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js"></${'script'}>
-        <link rel="import" href="./reference-element.html">
+        <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js"></${'script'}>
+        <link rel="import" href="../reference-element.html">
       `,
       testHtml: `
         <reference-element></reference-element>
@@ -30,7 +31,7 @@
     tester.add({
       name: 'Math.random()*10',
       initHtml: `
-        <script src="./node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js"></${'script'}>
+        <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js"></${'script'}>
         <link rel="import" href="./random-times.html">
       `,
       testHtml: `

@@ -1,7 +1,7 @@
 class WcPerformanceTester extends PerformanceTester {
   add(test) {
     test.initHtml += `
-      <link rel="import" href="./performance-end.html">
+      <link rel="import" href="${this.rootUrl}/performance-end.html">
     `;
     super.add(test);
   }

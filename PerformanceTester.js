@@ -56,6 +56,7 @@ class PerformanceTester {
   constructor(rootNode) {
     this.running = false;
     this.sequence = '1-10;11-20[2,5];20-100[1,30]';
+    this.rootUrl = '../node_modules/@d4kmor/performance-tester';
     this.tests = [];
     rootNode.innerHTML = `
       <h1>Tester</h1>
