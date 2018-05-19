@@ -1,4 +1,4 @@
-class PerformanceTester {
+export class PerformanceTester {
   static timeout(time) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {

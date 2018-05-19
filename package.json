@@ -4,11 +4,9 @@
   "description": "Tester performance of JavaScript and WebComponents and get beautiful resulting graphs.",
   "author": "Thomas Allmer <d4kmor@gmail.com>",
   "license": "MIT",
-  "dependencies": {
-    "@webcomponents/webcomponentsjs": "^1.0.0",
-    "babel-polyfill": "^6.26.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@webcomponents/webcomponentsjs": "^1.0.0",
     "babel-polyfill": "^6.26.0",
     "chai": "^4.1.2",
     "eclint": "^2.6.0",

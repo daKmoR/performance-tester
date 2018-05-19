@@ -6,21 +6,18 @@
   <script src="../node_modules/mocha/mocha.js"></script>
   <script src="../node_modules/chai/chai.js"></script>
   <script src="../node_modules/sinon/pkg/sinon.js"></script>
+  <script src="../node_modules/babel-polyfill/dist/polyfill.min.js"></script>
 </head>
 <body>
   <div id="mocha"></div>
-
-  <script>
+  <script type="module">
     window.mocha.setup('bdd');
     window.expect = chai.expect;
   </script>
-
-  <script src="../PerformanceTester.js"></script>
-  <script src="./PerformanceTester.js"></script>
-
-  <script>
-    mocha.checkLeaks();
-    mocha.run();
+  <script type="module">
+    import './PerformanceTester.js';
+    window.mocha.checkLeaks();
+    window.mocha.run();
   </script>
 </body>
 </html>

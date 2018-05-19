@@ -1,4 +1,6 @@
-class WcPerformanceTester extends PerformanceTester {
+import { PerformanceTester } from './PerformanceTester.js';
+
+export class WcPerformanceTester extends PerformanceTester {
   add(test) {
     test.initHtml += `
       <link rel="import" href="${this.rootUrl}/performance-end.html">

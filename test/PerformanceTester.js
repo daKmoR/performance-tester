@@ -1,3 +1,5 @@
+import { PerformanceTester } from '../PerformanceTester.js';
+
 describe('Performance Tester', () => {
   it('can add tests (and they get a default trance number)', () => {
     const perf = new PerformanceTester();

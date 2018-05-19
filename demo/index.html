@@ -6,12 +6,11 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="../node_modules/babel-polyfill/dist/polyfill.min.js"></script>
 
-  <script src="../PerformanceTester.js"></script>
-  <script src="../WcPerformanceTester.js"></script>
 </head>
 <body>
   <div id="tester"></div>
-  <script>
+  <script type="module">
+    import { WcPerformanceTester } from '../WcPerformanceTester.js';
     const tester = new WcPerformanceTester({ rootNode: document.querySelector('#tester') });
     tester.rootUrl = '../';
     // tester.sequence = '1-10;11-20[2,5];20-100[1,30]';
