@@ -1,5 +1,5 @@
 describe('Performance Tester', () => {
-  it('can override default options as parameters', () => {
+  it('can override default options as arguments', () => {
     const perf = new PerformanceTester();
     expect(perf.rootUrl).to.equal('../node_modules/@d4kmor/performance-tester');
     const perf2 = new PerformanceTester({rootUrl: 'foo'});

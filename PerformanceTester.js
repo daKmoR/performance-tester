@@ -65,22 +65,22 @@ class PerformanceTester {
     Object.assign(this, optionsWithDefaults);
 
     if (this.rootNode) {
-      rootNode.innerHTML = `
+      this.rootNode.innerHTML = `
         <h1>Tester</h1>
         <button id="start">start</button>
         <button id="stop">stop</button>
         <div id="graph"></div>
       `;
 
-      this.startButton = rootNode.querySelector('#start');
+      this.startButton = this.rootNode.querySelector('#start');
       this.startButton.addEventListener('click', () => {
         this.start();
       });
-      this.stopButton = rootNode.querySelector('#stop');
+      this.stopButton = this.rootNode.querySelector('#stop');
       this.stopButton.addEventListener('click', () => {
         this.stop();
       });
-      this.graphNode = rootNode.querySelector('#graph');
+      this.graphNode = this.rootNode.querySelector('#graph');
 
       this.graphSetup = false;
       this.graphTraceSetup = { 0: true };
