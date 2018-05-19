@@ -87,33 +87,6 @@ class PerformanceTester {
     }
   }
 
-  addSingleTestToGraph(result, options) {
-    if (typeof Plotly === 'undefined') { return; }
-    if (!this.graphSetup) {
-      Plotly.newPlot(this.graphNode, [{
-        x: [options.multiplyHtml],
-        y: [result.duration],
-        mode: 'lines+markers',
-        type: 'scatter',
-        name: options.test.name,
-      }], {});
-      this.graphSetup = true;
-    } else {
-      let data = {
-        x: [[options.multiplyHtml]],
-        y: [[result.duration]],
-      };
-
-      if (!this.graphTraceSetup[options.trace]) {
-        data.name = options.test.name;
-        Plotly.addTraces(this.graphNode, data);
-        this.graphTraceSetup[options.trace] = true;
-      } else {
-        Plotly.extendTraces(this.graphNode, data, [options.trace]);
-      }
-    }
-  }
-
   add(test) {
     test.trace = this.tests.length;
     this.tests.push(test);
@@ -126,18 +99,6 @@ class PerformanceTester {
 
   stop() {
     this._running = false;
-  }
-
-  setupIframe() {
-    return new Promise((resolve) => {
-      this.iframe = document.createElement('iframe');
-      this.iframe.addEventListener('load', () => {
-        this.iframeWin = this.iframe.contentWindow || this.iframe;
-        this.iframeDoc = this.iframe.contentDocument || this.iframeWin.document;
-        resolve();
-      });
-      document.body.appendChild(this.iframe);
-    });
   }
 
   async executeSuite() {
@@ -168,6 +129,39 @@ class PerformanceTester {
     return results;
   }
 
+  async executeSingleTest(test, { repeat = 1, multiplyHtml = 1 } = { repeat: 1, multiplyHtml: 1}) {
+    await this.setupIframe();
+
+    await this.testInit(test, { repeat, multiplyHtml });
+
+    let start = performance.now();
+    await this.testWrite(test, { repeat, multiplyHtml });
+
+    let end = performance.now();
+    let duration = end - start;
+
+    let result = { start, end, duration };
+    this.addSingleTestToGraph(result, {
+      multiplyHtml: multiplyHtml,
+      trace: test.trace,
+      test
+    });
+
+    return result;
+  }
+
+  setupIframe() {
+    return new Promise((resolve) => {
+      this.iframe = document.createElement('iframe');
+      this.iframe.addEventListener('load', () => {
+        this.iframeWin = this.iframe.contentWindow || this.iframe;
+        this.iframeDoc = this.iframe.contentDocument || this.iframeWin.document;
+        resolve();
+      });
+      document.body.appendChild(this.iframe);
+    });
+  }
+
   testInit({ initHtml }) {
     return new Promise((resolve) => {
       this.iframeDoc.open();
@@ -194,25 +188,31 @@ class PerformanceTester {
     });
   }
 
-  async executeSingleTest(test, { repeat = 1, multiplyHtml = 1 } = { repeat: 1, multiplyHtml: 1}) {
-    await this.setupIframe();
+  addSingleTestToGraph(result, options) {
+    if (typeof Plotly === 'undefined') { return; }
+    if (!this.graphSetup) {
+      Plotly.newPlot(this.graphNode, [{
+        x: [options.multiplyHtml],
+        y: [result.duration],
+        mode: 'lines+markers',
+        type: 'scatter',
+        name: options.test.name,
+      }], {});
+      this.graphSetup = true;
+    } else {
+      let data = {
+        x: [[options.multiplyHtml]],
+        y: [[result.duration]],
+      };
 
-    await this.testInit(test, { repeat, multiplyHtml });
-
-    let start = performance.now();
-    await this.testWrite(test, { repeat, multiplyHtml });
-
-    let end = performance.now();
-    let duration = end - start;
-
-    let result = { start, end, duration };
-    this.addSingleTestToGraph(result, {
-      multiplyHtml: multiplyHtml,
-      trace: test.trace,
-      test
-    });
-
-    return result;
+      if (!this.graphTraceSetup[options.trace]) {
+        data.name = options.test.name;
+        Plotly.addTraces(this.graphNode, data);
+        this.graphTraceSetup[options.trace] = true;
+      } else {
+        Plotly.extendTraces(this.graphNode, data, [options.trace]);
+      }
+    }
   }
   //   test.results = {
   //     10: [
