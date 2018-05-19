@@ -88,6 +88,7 @@ class PerformanceTester {
   }
 
   addSingleTestToGraph(result, options) {
+    if (typeof Plotly === 'undefined') { return; }
     if (!this.graphSetup) {
       Plotly.newPlot(this.graphNode, [{
         x: [options.multiplyHtml],
@@ -167,7 +168,7 @@ class PerformanceTester {
     return results;
   }
 
-  testInit(test, options) {
+  testInit({ initHtml }) {
     return new Promise((resolve) => {
       this.iframeDoc.open();
 
@@ -176,7 +177,7 @@ class PerformanceTester {
           resolve();
         }, 0);
       });
-      this.iframeDoc.write(test.initHtml + `
+      this.iframeDoc.write(initHtml + `
         <script>
           document.dispatchEvent(new CustomEvent('PerformanceTesterInitDone'));
         </${'script'}>
@@ -186,27 +187,27 @@ class PerformanceTester {
     });
   }
 
-  testWrite(test, options) {
+  testWrite({ testHtml }, { multiplyHtml = 1 } = { multiplyHtml: 1 }) {
     return new Promise((resolve) => {
-      this.iframeDoc.body.innerHTML = test.testHtml.repeat(options.multiplyHtml);
+      this.iframeDoc.body.innerHTML = testHtml.repeat(multiplyHtml);
       resolve();
     });
   }
 
-  async executeSingleTest(test, options) {
+  async executeSingleTest(test, { repeat = 1, multiplyHtml = 1 } = { repeat: 1, multiplyHtml: 1}) {
     await this.setupIframe();
 
-    await this.testInit(test, options);
+    await this.testInit(test, { repeat, multiplyHtml });
 
     let start = performance.now();
-    await this.testWrite(test, options);
+    await this.testWrite(test, { repeat, multiplyHtml });
 
     let end = performance.now();
     let duration = end - start;
-    // console.log(test.duration);
+
     let result = { start, end, duration };
     this.addSingleTestToGraph(result, {
-      multiplyHtml: options.multiplyHtml,
+      multiplyHtml: multiplyHtml,
       trace: test.trace,
       test
     });

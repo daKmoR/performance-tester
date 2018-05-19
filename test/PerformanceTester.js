@@ -6,6 +6,52 @@ describe('Performance Tester', () => {
     expect(perf2.rootUrl).to.equal('foo');
   });
 
+
+
+  describe('Single Test', () => {
+    it('creates an iframe and returns promise for it to be ready', (done) => {
+      const perf = new PerformanceTester();
+      const iFrameWait = perf.setupIframe();
+      iFrameWait.then(() => {
+        expect(perf.iframe).to.be.instanceof(HTMLIFrameElement);
+        expect(perf.iframeDoc.constructor.name).to.equal('HTMLDocument');
+        done();
+      });
+    });
+
+    it('writes async test.initHtml to iframe', async () => {
+      const perf = new PerformanceTester();
+      await perf.setupIframe();
+      await perf.testInit({ initHtml: `<script>document.foo = 'bar';</script>` });
+
+      expect(perf.iframeDoc.head.querySelectorAll('script').length).to.equal(2);
+      expect(perf.iframeDoc.foo).to.equal('bar');
+    });
+
+    it('writes async test.testHtml x times (multiplyHtml) to iframe.body.innerHTML', async () => {
+      const perf = new PerformanceTester();
+      await perf.setupIframe();
+      await perf.testWrite({ testHtml: `<div>foo</div>`, });
+
+      expect(perf.iframeDoc.body.querySelectorAll('*').length).to.equal(1);
+      expect(perf.iframeDoc.body.querySelector('div').innerText).to.equal('foo');
+
+      await perf.testWrite({ testHtml: `<div>foo</div>` }, { multiplyHtml: 3 });
+      expect(perf.iframeDoc.body.querySelectorAll('*').length).to.equal(3);
+      expect(perf.iframeDoc.body.querySelector('div').innerText).to.equal('foo');
+    });
+
+    it('executes all needed steps and returns a result', async () => {
+      const perf = new PerformanceTester();
+      const result = await perf.executeSingleTest({
+        initHtml: '',
+        testHtml: `<div>foo</div>`,
+      });
+      expect(result).to.have.keys(['start', 'end', 'duration']);
+    });
+
+  });
+
   describe('Sequence', () => {
     it('can be an exact number for how often the html should be multiplied e.g. 3', () => {
       const perf = new PerformanceTester({sequence: '3'});
