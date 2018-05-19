@@ -153,6 +153,9 @@ export default class PerformanceTester {
       test,
     });
 
+    // bugs out webcomponents polyfill in IE11
+    // this.removeIframe();
+
     return result;
   }
 
@@ -168,6 +171,10 @@ export default class PerformanceTester {
     });
   }
 
+  removeIframe() {
+    document.body.removeChild(this.iframe);
+  }
+
   testInit(initHtml) {
     return new Promise((resolve) => {
       this.iframeDoc.open();
@@ -179,7 +186,9 @@ export default class PerformanceTester {
       });
       this.iframeDoc.write(`${initHtml}
         <script>
-          document.dispatchEvent(new CustomEvent('PerformanceTesterInitDone'));
+          var event = document.createEvent('Event');
+          event.initEvent('PerformanceTesterInitDone', true, true);
+          document.dispatchEvent(event);
         </${'script'}>
       `);
 

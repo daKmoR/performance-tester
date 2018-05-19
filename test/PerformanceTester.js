@@ -62,7 +62,8 @@ describe('Performance Tester', () => {
       const iFrameWait = perf.setupIframe();
       iFrameWait.then(() => {
         expect(perf.iframe).to.be.instanceof(HTMLIFrameElement);
-        expect(perf.iframeDoc.constructor.name).to.equal('HTMLDocument');
+        expect(typeof perf.iframeDoc).to.equal('object');
+        perf.removeIframe();
         done();
       });
     });
@@ -74,6 +75,8 @@ describe('Performance Tester', () => {
 
       expect(perf.iframeDoc.head.querySelectorAll('script').length).to.equal(2);
       expect(perf.iframeDoc.foo).to.equal('bar');
+
+      perf.removeIframe();
     });
 
     it('writes async test.testHtml x times (multiplyHtml) to iframe.body.innerHTML', async () => {
@@ -87,6 +90,8 @@ describe('Performance Tester', () => {
       await perf.testWrite('<div>foo</div>', 3);
       expect(perf.iframeDoc.body.querySelectorAll('*').length).to.equal(3);
       expect(perf.iframeDoc.body.querySelector('div').innerText).to.equal('foo');
+
+      perf.removeIframe();
     });
 
     it('executes all needed steps and returns a result', async () => {
