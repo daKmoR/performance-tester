@@ -103,24 +103,24 @@ class PerformanceTester {
 
   async executeSuite() {
     for (let i = 0; i < this.tests.length; i += 1) {
-      this.tests[i].results = await this.executePatch(this.tests[i], this.patchRuns);
+      this.tests[i].results = await this.executeTest(this.tests[i], this.patchRuns);
       console.log(this.tests[i].results);
     }
   }
 
-  async executePatch(test, runs) {
+  async executeTest(test, runs) {
     const results = {};
     for (let i = 0; i < runs.length; i += 1) {
-      let result = await this.executeTest(test, runs[i]);
+      let result = await this.executeTestRuns(test, runs[i]);
       results[runs[i].multiplyHtml] = result;
     }
     return results;
   }
 
-  async executeTest(test, { repeats = 1, multiplyHtml = 1 } = { repeats: 1, multiplyHtml: 1 }) {
+  async executeTestRuns(test, { repeats = 1, multiplyHtml = 1 } = { repeats: 1, multiplyHtml: 1 }) {
     const results = [];
     for (let i = 0; i < repeats; i += 1) {
-      let result = await this.executeSingleTest(test, multiplyHtml);
+      let result = await this.executeTestRun(test, multiplyHtml);
       results.push(result);
       if (this._running === false) {
         return results;
@@ -129,7 +129,7 @@ class PerformanceTester {
     return results;
   }
 
-  async executeSingleTest(test, multiplyHtml = 1) {
+  async executeTestRun(test, multiplyHtml = 1) {
     await this.setupIframe();
 
     test.initHtml = test.initHtml || '';

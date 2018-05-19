@@ -6,21 +6,21 @@ describe('Performance Tester', () => {
     expect(perf2.rootUrl).to.equal('foo');
   });
 
-  it('can repeat a single test multiple times', async () => {
+  it('can repeat a single test run multiple times', async () => {
     const perf = new PerformanceTester();
-    const result = await perf.executeTest({
+    const result = await perf.executeTestRuns({
       testHtml: '<div>foo</div>'
     });
     expect(result.length).to.equal(1);
 
-    const result2 = await perf.executeTest({
+    const result2 = await perf.executeTestRuns({
       testHtml: '<div>foo</div>'
     }, { repeats: 2 });
     expect(result2.length).to.equal(2);
   });
 
-  describe('Single Test', () => {
-    it('creates an iframe and returns promise for it to be ready', (done) => {
+  describe('Single Test Run', () => {
+    it('creates an async iframe', (done) => {
       const perf = new PerformanceTester();
       const iFrameWait = perf.setupIframe();
       iFrameWait.then(() => {
@@ -54,7 +54,7 @@ describe('Performance Tester', () => {
 
     it('executes all needed steps and returns a result', async () => {
       const perf = new PerformanceTester();
-      const result = await perf.executeSingleTest({
+      const result = await perf.executeTestRun({
         testHtml: `<div>foo</div>`,
       });
       expect(result).to.have.keys(['start', 'end', 'duration']);
