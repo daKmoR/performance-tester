@@ -1,11 +1,35 @@
 {
   "name": "performance-tester",
-  "version": "1.0.0",
-  "main": "index.js",
+  "version": "0.0.1",
+  "description": "Tester performance of JavaScript and WebComponents and get beautiful resulting graphs.",
   "author": "Thomas Allmer <d4kmor@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@webcomponents/webcomponentsjs": "^1.0.0",
     "babel-polyfill": "^6.26.0"
+  },
+  "devDependencies": {
+    "babel-polyfill": "^6.26.0",
+    "chai": "^4.1.2",
+    "eclint": "^2.6.0",
+    "eslint": "^4.19.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-html": "^4.0.2",
+    "eslint-plugin-import": "^2.9.0",
+    "mocha": "^5.2.0",
+    "regenerator-runtime": "^0.11.1",
+    "stylelint": "^9.2.0",
+    "stylelint-config-standard": "^18.2.0"
+  },
+  "scripts": {
+    "start": "polymer serve -o",
+    "test": "polymer test --skip-selenium-install",
+    "lint": "npm run lint:ec && npm run lint:js && npm run lint:css && npm run lint:polymer",
+    "lint:polymer": "polymer lint --input ./*.html",
+    "lint:css": "stylelint $(npm run lint:getFiles --silent)",
+    "lint:ec": "eclint fix $(npm run lint:getFiles --silent)",
+    "lint:js": "eslint $(npm run lint:getFiles --silent)",
+    "lint:report": "npm run lint:ec > ./.tmp/editorconfig_errors.txt && npm run lint:js -- -f html -o ./.tmp/eslint_errors.html && npm run lint:css > ./.tmp/cssLint_errors.txt && npm run lint:polymer > ./.tmp/polymer_errors.txt",
+    "lint:getFiles": "find . \\( -name '*.html' -o -name '*.js' -o -name '*.css' \\) -type f -not -path '*/\\.*' -not -path '*bower_components/*' -not -path '*node_modules/*' -not -path '*assets/*'"
   }
 }
