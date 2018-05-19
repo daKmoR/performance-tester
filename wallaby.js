@@ -1,11 +1,11 @@
 module.exports = () => {
   return {
     files: [
-      'src/*.js',
+      '*.js',
       {pattern: 'node_modules/chai/chai.js', instrument: false},
     ],
     tests: [
-      'test/*Spec.js'
+      'test/*.js'
     ],
     testFramework: 'mocha',
     debug: true,

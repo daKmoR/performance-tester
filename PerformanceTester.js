@@ -30,19 +30,20 @@ class PerformanceTester {
         let options = part.substring(part.indexOf('[') + 1, part.indexOf(']'));
         [repeats, multiplySpread] = options.split(',');
         repeats = parseInt(repeats);
-        multiplySpread = parseInt(multiplySpread);
+        multiplySpread = multiplySpread ? parseInt(multiplySpread) : -1;
         part = part.substring(0, part.indexOf('['));
       }
       let [start, end] = part.split('-');
       start = parseInt(start);
-      end = parseInt(end);
+      end = end ? parseInt(end) : start;
 
-      let i = start;
       multiplySpread = multiplySpread === -1 ? end : multiplySpread;
-      let step = (end - start + 1) / multiplySpread;
+      let step = Math.floor((end - start + 1) / multiplySpread);
+      let i = step > 1 ? start - 1 + step : start;
       while(i <= end) {
-        newPatchRuns.push({repeats, multiplyHtml: Math.floor(i)});
+        newPatchRuns.push({repeats, multiplyHtml: i});
         i += step;
+        if (step === 0) { break; }
       }
     });
 
@@ -53,36 +54,43 @@ class PerformanceTester {
     return this.__sequence;
   }
 
-  constructor(rootNode) {
-    this.running = false;
-    this.sequence = '1-10;11-20[2,5];20-100[1,30]';
-    this.rootUrl = '../node_modules/@d4kmor/performance-tester';
-    this.tests = [];
-    rootNode.innerHTML = `
-      <h1>Tester</h1>
-      <button id="start">start</button>
-      <button id="stop">stop</button>
-      <div id="graph"></div>
-    `;
+  constructor(options) {
+    let optionsWithDefaults = Object.assign({}, {
+      sequence: '1-10;11-20[2,5];20-100[1,30]',
+      rootUrl: '../node_modules/@d4kmor/performance-tester',
+      tests: []
+    }, options);
+    this._running = false;
 
-    this.startButton = rootNode.querySelector('#start');
-    this.startButton.addEventListener('click', () => {
-      this.start();
-    });
-    this.stopButton = rootNode.querySelector('#stop');
-    this.stopButton.addEventListener('click', () => {
-      this.stop();
-    });
-    this.graphNode = rootNode.querySelector('#graph');
+    Object.assign(this, optionsWithDefaults);
 
-    this.graphSetup = false;
-    this.graphTraceSetup = { 0: true };
+    if (this.rootNode) {
+      rootNode.innerHTML = `
+        <h1>Tester</h1>
+        <button id="start">start</button>
+        <button id="stop">stop</button>
+        <div id="graph"></div>
+      `;
+
+      this.startButton = rootNode.querySelector('#start');
+      this.startButton.addEventListener('click', () => {
+        this.start();
+      });
+      this.stopButton = rootNode.querySelector('#stop');
+      this.stopButton.addEventListener('click', () => {
+        this.stop();
+      });
+      this.graphNode = rootNode.querySelector('#graph');
+
+      this.graphSetup = false;
+      this.graphTraceSetup = { 0: true };
+    }
   }
 
   addSingleTestToGraph(result, options) {
     if (!this.graphSetup) {
-      Plotly.newPlot(this.graphNode, [{ 
-        x: [options.multiplyHtml], 
+      Plotly.newPlot(this.graphNode, [{
+        x: [options.multiplyHtml],
         y: [result.duration],
         mode: 'lines+markers',
         type: 'scatter',
@@ -94,7 +102,7 @@ class PerformanceTester {
         x: [[options.multiplyHtml]],
         y: [[result.duration]],
       };
-      
+
       if (!this.graphTraceSetup[options.trace]) {
         data.name = options.test.name;
         Plotly.addTraces(this.graphNode, data);
@@ -111,12 +119,12 @@ class PerformanceTester {
   }
 
   start() {
-    this.running = true;
+    this._running = true;
     this.executeSuite();
   }
 
   stop() {
-    this.running = false;
+    this._running = false;
   }
 
   setupIframe() {
@@ -130,7 +138,7 @@ class PerformanceTester {
       document.body.appendChild(this.iframe);
     });
   }
-  
+
   async executeSuite() {
     for (let i = 0; i < this.tests.length; i += 1) {
       this.tests[i].results = await this.executePatch(this.tests[i], this.patchRuns);
@@ -152,7 +160,7 @@ class PerformanceTester {
     for (let i = 0; i < options.repeats; i += 1) {
       let result = await this.executeSingleTest(test, options);
       results.push(result);
-      if (this.running === false) {
+      if (this._running === false) {
         return results;
       }
     }
@@ -197,8 +205,8 @@ class PerformanceTester {
     let duration = end - start;
     // console.log(test.duration);
     let result = { start, end, duration };
-    this.addSingleTestToGraph(result, { 
-      multiplyHtml: options.multiplyHtml, 
+    this.addSingleTestToGraph(result, {
+      multiplyHtml: options.multiplyHtml,
       trace: test.trace,
       test
     });
@@ -216,5 +224,5 @@ class PerformanceTester {
   //         memory: {}
   //       }
   //     ]
-  //   };    
+  //   };
 }
