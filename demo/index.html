@@ -10,7 +10,8 @@
 <body>
   <div id="tester"></div>
   <script type="module">
-    import { WcPerformanceTester } from '../WcPerformanceTester.js';
+    import WcPerformanceTester from '../WcPerformanceTester.js';
+
     const tester = new WcPerformanceTester({ rootNode: document.querySelector('#tester') });
     tester.rootUrl = '../';
     // tester.sequence = '1-10;11-20[2,5];20-100[1,30]';

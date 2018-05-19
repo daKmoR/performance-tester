@@ -3,5 +3,9 @@ module.exports = {
   "env": {
     "browser": true
   },
-  "plugins": ["html"]
+  "plugins": ["html"],
+  "rules": {
+    "import/extensions": "off",
+    "no-underscore-dangle": "off",
+  }
 };

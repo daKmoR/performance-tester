@@ -1,6 +1,8 @@
-export class PerformanceTester {
+/* global Plotly */
+
+export default class PerformanceTester {
   static timeout(time) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       setTimeout(() => {
         resolve();
       }, time);
@@ -29,17 +31,17 @@ export class PerformanceTester {
       if (part.indexOf('[') !== -1) {
         const options = part.substring(part.indexOf('[') + 1, part.indexOf(']'));
         [repeats, multiplySpread] = options.split(',');
-        repeats = parseInt(repeats);
-        multiplySpread = multiplySpread ? parseInt(multiplySpread) : -1;
+        repeats = parseInt(repeats, 10);
+        multiplySpread = multiplySpread ? parseInt(multiplySpread, 10) : -1;
         part = part.substring(0, part.indexOf('['));
       }
       let [start, end] = part.split('-');
-      start = parseInt(start);
-      end = end ? parseInt(end) : start;
+      start = parseInt(start, 10);
+      end = end ? parseInt(end, 10) : start;
 
       multiplySpread = multiplySpread === -1 ? end : multiplySpread;
-      const step = Math.floor((end - start + 1) / multiplySpread);
-      let i = step > 1 ? start - 1 + step : start;
+      const step = Math.floor(((end - start) + 1) / multiplySpread);
+      let i = step > 1 ? (start - 1) + step : start;
       while (i <= end) {
         newPatchRuns.push({ repeats, multiplyHtml: i });
         i += step;
@@ -88,8 +90,9 @@ export class PerformanceTester {
   }
 
   add(test) {
-    test.trace = test.trace || this.tests.length;
-    this.tests.push(test);
+    const testToAdd = test;
+    testToAdd.trace = testToAdd.trace || this.tests.length;
+    this.tests.push(testToAdd);
   }
 
   start() {

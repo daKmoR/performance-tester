@@ -1,8 +1,8 @@
 <script>
   class RandomTimes extends HTMLElement {
-    sleep(milliseconds) {
+    static sleep(milliseconds) {
       const start = new Date().getTime();
-      for (let i = 0; i < 1e7; i++) {
+      for (let i = 0; i < 1e7; i += 1) {
         if ((new Date().getTime() - start) > milliseconds) {
           break;
         }
@@ -15,7 +15,7 @@
     connectedCallback() {
       this.shadowRoot.innerHTML = '<h1>In Shadow Dom</h1><slot></slot>';
       this.innerHTML = '<p>In Light Dom</p>';
-      this.sleep(Math.random() * 30);
+      this.constructor.sleep(Math.random() * 30);
     }
   }
   customElements.define('random-times', RandomTimes);
