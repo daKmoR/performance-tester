@@ -6,7 +6,18 @@ describe('Performance Tester', () => {
     expect(perf2.rootUrl).to.equal('foo');
   });
 
+  it('can repeat a single test multiple times', async () => {
+    const perf = new PerformanceTester();
+    const result = await perf.executeTest({
+      testHtml: '<div>foo</div>'
+    });
+    expect(result.length).to.equal(1);
 
+    const result2 = await perf.executeTest({
+      testHtml: '<div>foo</div>'
+    }, { repeats: 2 });
+    expect(result2.length).to.equal(2);
+  });
 
   describe('Single Test', () => {
     it('creates an iframe and returns promise for it to be ready', (done) => {
@@ -22,7 +33,7 @@ describe('Performance Tester', () => {
     it('writes async test.initHtml to iframe', async () => {
       const perf = new PerformanceTester();
       await perf.setupIframe();
-      await perf.testInit({ initHtml: `<script>document.foo = 'bar';</script>` });
+      await perf.testInit(`<script>document.foo = 'bar';</script>`);
 
       expect(perf.iframeDoc.head.querySelectorAll('script').length).to.equal(2);
       expect(perf.iframeDoc.foo).to.equal('bar');
@@ -31,12 +42,12 @@ describe('Performance Tester', () => {
     it('writes async test.testHtml x times (multiplyHtml) to iframe.body.innerHTML', async () => {
       const perf = new PerformanceTester();
       await perf.setupIframe();
-      await perf.testWrite({ testHtml: `<div>foo</div>`, });
+      await perf.testWrite(`<div>foo</div>`);
 
       expect(perf.iframeDoc.body.querySelectorAll('*').length).to.equal(1);
       expect(perf.iframeDoc.body.querySelector('div').innerText).to.equal('foo');
 
-      await perf.testWrite({ testHtml: `<div>foo</div>` }, { multiplyHtml: 3 });
+      await perf.testWrite(`<div>foo</div>`, 3);
       expect(perf.iframeDoc.body.querySelectorAll('*').length).to.equal(3);
       expect(perf.iframeDoc.body.querySelector('div').innerText).to.equal('foo');
     });
@@ -44,7 +55,6 @@ describe('Performance Tester', () => {
     it('executes all needed steps and returns a result', async () => {
       const perf = new PerformanceTester();
       const result = await perf.executeSingleTest({
-        initHtml: '',
         testHtml: `<div>foo</div>`,
       });
       expect(result).to.have.keys(['start', 'end', 'duration']);

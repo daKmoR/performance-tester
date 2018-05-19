@@ -60,7 +60,7 @@ class PerformanceTester {
       rootUrl: '../node_modules/@d4kmor/performance-tester',
       tests: []
     }, options);
-    this._running = false;
+    this._running = null;
 
     Object.assign(this, optionsWithDefaults);
 
@@ -117,10 +117,10 @@ class PerformanceTester {
     return results;
   }
 
-  async executeTest(test, options) {
+  async executeTest(test, { repeats = 1, multiplyHtml = 1 } = { repeats: 1, multiplyHtml: 1 }) {
     const results = [];
-    for (let i = 0; i < options.repeats; i += 1) {
-      let result = await this.executeSingleTest(test, options);
+    for (let i = 0; i < repeats; i += 1) {
+      let result = await this.executeSingleTest(test, multiplyHtml);
       results.push(result);
       if (this._running === false) {
         return results;
@@ -129,13 +129,14 @@ class PerformanceTester {
     return results;
   }
 
-  async executeSingleTest(test, { repeat = 1, multiplyHtml = 1 } = { repeat: 1, multiplyHtml: 1}) {
+  async executeSingleTest(test, multiplyHtml = 1) {
     await this.setupIframe();
 
-    await this.testInit(test, { repeat, multiplyHtml });
+    test.initHtml = test.initHtml || '';
+    await this.testInit(test.initHtml);
 
     let start = performance.now();
-    await this.testWrite(test, { repeat, multiplyHtml });
+    await this.testWrite(test.testHtml, multiplyHtml);
 
     let end = performance.now();
     let duration = end - start;
@@ -162,7 +163,7 @@ class PerformanceTester {
     });
   }
 
-  testInit({ initHtml }) {
+  testInit(initHtml) {
     return new Promise((resolve) => {
       this.iframeDoc.open();
 
@@ -181,7 +182,7 @@ class PerformanceTester {
     });
   }
 
-  testWrite({ testHtml }, { multiplyHtml = 1 } = { multiplyHtml: 1 }) {
+  testWrite(testHtml, multiplyHtml = 1) {
     return new Promise((resolve) => {
       this.iframeDoc.body.innerHTML = testHtml.repeat(multiplyHtml);
       resolve();

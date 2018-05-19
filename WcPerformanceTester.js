@@ -6,26 +6,26 @@ class WcPerformanceTester extends PerformanceTester {
     super.add(test);
   }
 
-  testInit(test, options) {
+  testInit(initHtml) {
     return new Promise((resolve) => {
       this.iframeDoc.open();
 
       this.iframeDoc.addEventListener('WebComponentsReady', function() {
         resolve();
       });
-      this.iframeDoc.write(test.initHtml);
+      this.iframeDoc.write(initHtml);
 
       this.iframeDoc.close();
     });
   }
 
-  testWrite(test, options) {
+  testWrite(testHtml, multiplyHtml) {
     return new Promise((resolve) => {
       this.iframeDoc.addEventListener('PerformanceTesterEnd', function() {
         resolve();
       });
 
-      this.iframeDoc.body.innerHTML = test.testHtml.repeat(options.multiplyHtml) + `
+      this.iframeDoc.body.innerHTML = testHtml.repeat(multiplyHtml) + `
         <performance-end></performance-end>
       `;
     });
