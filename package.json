@@ -23,12 +23,11 @@
   "scripts": {
     "start": "polymer serve -o",
     "test": "polymer test --skip-selenium-install",
-    "lint": "npm run lint:ec && npm run lint:js && npm run lint:css && npm run lint:polymer",
-    "lint:polymer": "polymer lint --input ./*.html",
+    "lint": "npm run lint:js && npm run lint:ec && npm run lint:css",
     "lint:css": "stylelint $(npm run lint:getFiles --silent)",
     "lint:ec": "eclint fix $(npm run lint:getFiles --silent)",
     "lint:js": "eslint $(npm run lint:getFiles --silent)",
-    "lint:report": "npm run lint:ec > ./.tmp/editorconfig_errors.txt && npm run lint:js -- -f html -o ./.tmp/eslint_errors.html && npm run lint:css > ./.tmp/cssLint_errors.txt && npm run lint:polymer > ./.tmp/polymer_errors.txt",
+    "lint:report": "npm run lint:js -- -f html -o ./.tmp/eslint_errors.html && npm run lint:ec > ./.tmp/editorconfig_errors.txt && npm run lint:css > ./.tmp/cssLint_errors.txt",
     "lint:getFiles": "find . \\( -name '*.html' -o -name '*.js' -o -name '*.css' \\) -type f -not -path '*/\\.*' -not -path '*bower_components/*' -not -path '*node_modules/*' -not -path '*assets/*'"
   }
 }

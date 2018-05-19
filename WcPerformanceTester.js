@@ -2,10 +2,11 @@ import PerformanceTester from './PerformanceTester.js';
 
 export default class WcPerformanceTester extends PerformanceTester {
   add(test) {
-    test.initHtml += `
+    const testToAdd = test;
+    testToAdd.initHtml += `
       <link rel="import" href="${this.rootUrl}/performance-end.html">
     `;
-    super.add(test);
+    super.add(testToAdd);
   }
 
   testInit(initHtml) {

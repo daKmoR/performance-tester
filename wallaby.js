@@ -14,6 +14,6 @@ module.exports = () => ({
     kind: 'chrome',
   },
   bootstrap() {
-    window.expect = chai.expect;
+    window.expect = window.chai.expect;
   },
 });

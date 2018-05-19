@@ -1,5 +1,8 @@
 /* global Plotly */
 
+/* We do not want to parallize test as this would distort the timing results */
+/* eslint-disable no-await-in-loop */
+
 export default class PerformanceTester {
   static timeout(time) {
     return new Promise((resolve) => {
@@ -134,7 +137,7 @@ export default class PerformanceTester {
   async executeTestRun(test, multiplyHtml = 1) {
     await this.setupIframe();
 
-    test.initHtml = test.initHtml || '';
+    test.initHtml = test.initHtml || ''; // eslint-disable-line no-param-reassign
     await this.testInit(test.initHtml);
 
     const start = performance.now();
