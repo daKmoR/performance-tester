@@ -56,6 +56,55 @@ describe('Performance Tester', () => {
     expect(result2.length).to.equal(2);
   });
 
+  it('calculates results like points, percentage & timer per instance & overall', () => {
+    // let tests = [
+    //   {
+    //     "2":[{"duration":33.29},{"duration":32.09}],
+    //     "4":[{"duration":64.90},{"duration":65.20}],
+    //     "6":[{"duration":96.60},{"duration":96.70}],
+    //     "8":[{"duration":128.99},{"duration":128.89}],
+    //     "10":[{"duration":161.40},{"duration":159.29}]
+    //   },
+    //   {
+    //     "2":[{"duration":48.59},{"duration":57.60}],
+    //     "4":[{"duration":95.49},{"duration":84.69}],
+    //     "6":[{"duration":86.29},{"duration":90.10}],
+    //     "8":[{"duration":124.49},{"duration":137.99}],
+    //     "10":[{"duration":136.30},{"duration":164.39}]
+    //   }
+    // ];
+    let tests = [
+      {
+        name: 'Reference Element',
+        rawResults: {
+          "2":[{"duration":33.29},{"duration":32.09}],
+          "6":[{"duration":96.60},{"duration":96.70}],
+          "10":[{"duration":161.27},{"duration":159.29}]
+        },
+      }, {
+        name: 'Random Element',
+        rawResults: {
+          "2":[{"duration":48.59},{"duration":57.60}],
+          "6":[{"duration":86.29},{"duration":90.10}],
+          "10":[{"duration":136.30},{"duration":164.39}]
+        },
+      },
+    ];
+    const result = PerformanceTester.calculateResults(tests);
+
+    expect(result).to.deep.equal([
+      {
+        name: 'Reference Element',
+        count: 18,
+
+        timeSum: 32.18,
+        timeAvg: 1,
+        timeMedian: 32.18,
+        timeStandardDeviation: 1,
+      }
+    ])
+  });
+
   describe('Test-Run', () => {
     it('creates an async iframe', (done) => {
       const perf = new PerformanceTester();

@@ -3,6 +3,38 @@
 /* We do not want to parallize test as this would distort the timing results */
 /* eslint-disable no-await-in-loop */
 
+class Stats {
+  static standardDeviation(values){
+    var avg = this.average(values);
+    var squareDiffs = values.map(function(value){
+      var diff = value - avg;
+      var sqrDiff = diff * diff;
+      return sqrDiff;
+    });
+    var avgSquareDiff = this.average(squareDiffs);
+    var stdDev = Math.sqrt(avgSquareDiff);
+    return stdDev;
+  }
+
+  static sum(data) {
+    return data.reduce((total, num) => total + num);
+  }
+
+  static average(data) {
+    return this.sum(data) / data.length;
+  }
+
+  static median(data) {
+    const length = data.length;
+    data.sort();
+    if (length % 2 === 0) { // is even
+      return (data[length / 2 - 1] + data[length / 2]) / 2;
+    } else { // is odd
+      return data[(length - 1) / 2];
+    }
+  }
+}
+
 export default class PerformanceTester {
   static timeout(time) {
     return new Promise((resolve) => {
@@ -109,8 +141,9 @@ export default class PerformanceTester {
 
   async executeSuite() {
     for (let i = 0; i < this.tests.length; i += 1) {
-      this.tests[i].results = await this.executeTest(this.tests[i], this.patchRuns);
+      this.tests[i].rawResults = await this.executeTest(this.tests[i], this.patchRuns);
     }
+    // this.calculateResults();
   }
 
   async executeTest(test, runs = [{ repeats: 1, multiplyHtml: 1 }]) {
@@ -232,7 +265,45 @@ export default class PerformanceTester {
       }
     }
   }
-  //   test.results = {
+
+  static calculateResult(test) {
+    const instanceData = [];
+    const rawData = [];
+
+    Object.keys(test.rawResults).forEach((instances) => {
+      const rawResults = test.rawResults[instances];
+      rawResults.forEach((rawResult) => {
+        instanceData.push(rawResult.duration / instances);
+        rawData.push(rawResult.duration);
+      });
+    });
+
+    return {
+      count: rawData.length,
+      timeSum: Stats.sum(instanceData),
+      timeAvg: Stats.average(instanceData),
+      timeMedian: Stats.median(instanceData),
+      timeStandardDeviation: Stats.standardDeviation(instanceData),
+    };
+  }
+
+  static calculateResults(tests) {
+    const result = [];
+    const testsWithResults = tests;
+    tests.forEach((test, index) => {
+      testsWithResults[index].result = this.calculateResult(test);
+    });
+
+    testsWithResults.sort(function(a,b) {
+      return a.result.timeMedian - b.result.timeMedian;
+    });
+    // console.log('by date:');
+    console.log(testsWithResults);
+
+
+  }
+
+  //   test.rawResults = {
   //     10: [
   //       {
   //         time: 105,
