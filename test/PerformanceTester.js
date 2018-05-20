@@ -21,8 +21,8 @@ describe('Performance Tester', () => {
     const perf = new PerformanceTester({ sequence: '1' });
     perf.add({ testHtml: '<div>foo</div>' });
     await perf.executeSuite();
-    expect(Object.keys(perf.tests[0].results).length).to.equal(1);
-    expect(perf.tests[0].results['1'][0]).to.have.keys(['start', 'end', 'duration']);
+    expect(Object.keys(perf.tests[0].rawResults).length).to.equal(1);
+    expect(perf.tests[0].rawResults['1'][0]).to.have.keys(['start', 'end', 'duration']);
   });
 
   it('can execute a test (which my triggers multiple test-runs)', async () => {
@@ -57,52 +57,43 @@ describe('Performance Tester', () => {
   });
 
   it('calculates results like points, percentage & timer per instance & overall', () => {
-    // let tests = [
-    //   {
-    //     "2":[{"duration":33.29},{"duration":32.09}],
-    //     "4":[{"duration":64.90},{"duration":65.20}],
-    //     "6":[{"duration":96.60},{"duration":96.70}],
-    //     "8":[{"duration":128.99},{"duration":128.89}],
-    //     "10":[{"duration":161.40},{"duration":159.29}]
-    //   },
-    //   {
-    //     "2":[{"duration":48.59},{"duration":57.60}],
-    //     "4":[{"duration":95.49},{"duration":84.69}],
-    //     "6":[{"duration":86.29},{"duration":90.10}],
-    //     "8":[{"duration":124.49},{"duration":137.99}],
-    //     "10":[{"duration":136.30},{"duration":164.39}]
-    //   }
-    // ];
-    let tests = [
+    const tests = [
       {
         name: 'Reference Element',
+        referenceElement: true,
         rawResults: {
-          "2":[{"duration":33.29},{"duration":32.09}],
-          "6":[{"duration":96.60},{"duration":96.70}],
-          "10":[{"duration":161.27},{"duration":159.29}]
+          2: [{ duration: 33.06 }, { duration: 32.47 }, { duration: 33.12 }],
+          6: [{ duration: 97.20 }, { duration: 97.78 }, { duration: 96.62 }],
+          10: [{ duration: 158.24 }, { duration: 154.0 }, { duration: 157.42 }],
         },
       }, {
         name: 'Random Element',
         rawResults: {
-          "2":[{"duration":48.59},{"duration":57.60}],
-          "6":[{"duration":86.29},{"duration":90.10}],
-          "10":[{"duration":136.30},{"duration":164.39}]
+          2: [{ duration: 48.50 }, { duration: 57.64 }, { duration: 48.90 }],
+          6: [{ duration: 86.24 }, { duration: 90.28 }, { duration: 90.66 }],
+          10: [{ duration: 136.30 }, { duration: 162.12 }, { duration: 141.22 }],
         },
       },
     ];
     const result = PerformanceTester.calculateResults(tests);
 
-    expect(result).to.deep.equal([
-      {
-        name: 'Reference Element',
-        count: 18,
+    const res1 = result[0].result;
+    expect(result[0].name).to.equal('Random Element');
+    expect(res1.timeAvg).to.equal(18.446);
+    expect(res1.timeSum).to.equal(166.014);
+    expect(res1.timeMedian).to.equal(15.11);
+    expect(res1.timeStandardDeviation).to.be.closeTo(5.4, 0.1);
+    expect(res1.timePercentage).is.be.closeTo(93, 1);
+    expect(res1.count).to.equal(9);
 
-        timeSum: 32.18,
-        timeAvg: 1,
-        timeMedian: 32.18,
-        timeStandardDeviation: 1,
-      }
-    ])
+    const res2 = result[1].result;
+    expect(result[1].name).to.equal('Reference Element');
+    expect(res2.timeAvg).to.equal(16.099);
+    expect(res2.timeSum).to.equal(144.891);
+    expect(res2.timeMedian).to.equal(16.2);
+    expect(res2.timeStandardDeviation).to.be.closeTo(0.3, 0.1);
+    expect(res2.timePercentage).to.equal(100);
+    expect(res2.count).to.equal(9);
   });
 
   describe('Test-Run', () => {

@@ -4,15 +4,15 @@
 /* eslint-disable no-await-in-loop */
 
 class Stats {
-  static standardDeviation(values){
-    var avg = this.average(values);
-    var squareDiffs = values.map(function(value){
-      var diff = value - avg;
-      var sqrDiff = diff * diff;
+  static standardDeviation(values) {
+    const avg = this.average(values);
+    const squareDiffs = values.map((value) => {
+      const diff = value - avg;
+      const sqrDiff = diff * diff;
       return sqrDiff;
     });
-    var avgSquareDiff = this.average(squareDiffs);
-    var stdDev = Math.sqrt(avgSquareDiff);
+    const avgSquareDiff = this.average(squareDiffs);
+    const stdDev = Math.sqrt(avgSquareDiff);
     return stdDev;
   }
 
@@ -29,9 +29,8 @@ class Stats {
     data.sort();
     if (length % 2 === 0) { // is even
       return (data[length / 2 - 1] + data[length / 2]) / 2;
-    } else { // is odd
-      return data[(length - 1) / 2];
-    }
+    } // is odd
+    return data[(length - 1) / 2];
   }
 }
 
@@ -247,22 +246,20 @@ export default class PerformanceTester {
         name: options.test.name,
       }], {});
       this.graphSetup = true;
+    } else if (!this.graphTraceSetup[options.trace]) {
+      Plotly.addTraces(this.graphNode, {
+        x: [options.multiplyHtml],
+        y: [result.duration],
+        mode: 'lines+markers',
+        type: 'scatter',
+        name: options.test.name,
+      });
+      this.graphTraceSetup[options.trace] = true;
     } else {
-      if (!this.graphTraceSetup[options.trace]) {
-        Plotly.addTraces(this.graphNode, {
-          x: [options.multiplyHtml],
-          y: [result.duration],
-          mode: 'lines+markers',
-          type: 'scatter',
-          name: options.test.name,
-        });
-        this.graphTraceSetup[options.trace] = true;
-      } else {
-        Plotly.extendTraces(this.graphNode, {
-          x: [[options.multiplyHtml]],
-          y: [[result.duration]],
-        }, [options.trace]);
-      }
+      Plotly.extendTraces(this.graphNode, {
+        x: [[options.multiplyHtml]],
+        y: [[result.duration]],
+      }, [options.trace]);
     }
   }
 
@@ -290,17 +287,25 @@ export default class PerformanceTester {
   static calculateResults(tests) {
     const result = [];
     const testsWithResults = tests;
+    let referenceMedian = null;
     tests.forEach((test, index) => {
       testsWithResults[index].result = this.calculateResult(test);
+      if (test.referenceElement) {
+        if (referenceMedian !== null) {
+          throw 'There can only be one test with .referenceElement = true!';
+        }
+        referenceMedian = testsWithResults[index].result.timeMedian;
+      }
     });
 
-    testsWithResults.sort(function(a,b) {
-      return a.result.timeMedian - b.result.timeMedian;
+    testsWithResults.sort((a, b) => a.result.timeMedian - b.result.timeMedian);
+    referenceMedian = referenceMedian || testsWithResults[0].result.timeMedian;
+
+    testsWithResults.forEach((test, index) => {
+      testsWithResults[index].result.timePercentage = 100 / referenceMedian * test.result.timeMedian;
     });
-    // console.log('by date:');
-    console.log(testsWithResults);
 
-
+    return testsWithResults;
   }
 
   //   test.rawResults = {
