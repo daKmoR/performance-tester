@@ -8,12 +8,10 @@ class Stats {
     const avg = this.average(values);
     const squareDiffs = values.map((value) => {
       const diff = value - avg;
-      const sqrDiff = diff * diff;
-      return sqrDiff;
+      return diff * diff;
     });
     const avgSquareDiff = this.average(squareDiffs);
-    const stdDev = Math.sqrt(avgSquareDiff);
-    return stdDev;
+    return Math.sqrt(avgSquareDiff);
   }
 
   static sum(data) {
@@ -29,7 +27,7 @@ class Stats {
     data.sort();
     if (length % 2 === 0) { // is even
       return (data[(length / 2) - 1] + data[length / 2]) / 2;
-    } // is odd
+    }
     return data[(length - 1) / 2];
   }
 }
