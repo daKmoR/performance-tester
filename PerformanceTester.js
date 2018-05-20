@@ -103,6 +103,7 @@ export default class PerformanceTester {
         <h1>Tester</h1>
         <button id="start">start</button>
         <button id="stop">stop</button>
+        <div id="summery"></div>
         <div id="graph"></div>
       `;
 
@@ -114,6 +115,9 @@ export default class PerformanceTester {
       this.stopButton.addEventListener('click', () => {
         this.stop();
       });
+
+      this.summeryNode = this.rootNode.querySelector('#summery');
+
       this.graphNode = this.rootNode.querySelector('#graph');
 
       this.graphSetup = false;
@@ -140,7 +144,37 @@ export default class PerformanceTester {
     for (let i = 0; i < this.tests.length; i += 1) {
       this.tests[i].rawResults = await this.executeTest(this.tests[i], this.patchRuns);
     }
-    // this.calculateResults();
+    this.tests = this.constructor.calculateResults(this.tests);
+    this.showSummary();
+  }
+
+  showSummary() {
+    if (this.summeryNode) {
+      this.constructor.renderSummary(this.summeryNode, this.tests);
+    }
+  }
+
+  static renderSummary(node, tests) {
+    node.innerHTML = `
+      <table>
+        <tr>
+          <th>Test Name</th>
+          <th>Percentage Time</th>
+          <th>Median</th>
+          <th>Average</th>
+          <th>Standard Deviation</th>
+        </tr>
+        ${tests.map(test => `
+          <tr>
+            <td>${test.name}</td>
+            <td>${test.result.timePercentage.toFixed(2)} %</td>
+            <td>${test.result.timeMedian.toFixed(2)} ms</td>
+            <td>${test.result.timeAvg.toFixed(2)} ms</td>
+            <td>${test.result.timeStandardDeviation.toFixed(2)}</td>
+          </tr>
+        `).join('')}
+      </table>
+    `;
   }
 
   async executeTest(test, runs = [{ repeats: 1, multiplyHtml: 1 }]) {
