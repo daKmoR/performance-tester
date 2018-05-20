@@ -25,10 +25,10 @@ class Stats {
   }
 
   static median(data) {
-    const length = data.length;
+    const { length } = data;
     data.sort();
     if (length % 2 === 0) { // is even
-      return (data[length / 2 - 1] + data[length / 2]) / 2;
+      return (data[(length / 2) - 1] + data[length / 2]) / 2;
     } // is odd
     return data[(length - 1) / 2];
   }
@@ -285,14 +285,13 @@ export default class PerformanceTester {
   }
 
   static calculateResults(tests) {
-    const result = [];
     const testsWithResults = tests;
     let referenceMedian = null;
     tests.forEach((test, index) => {
       testsWithResults[index].result = this.calculateResult(test);
       if (test.referenceElement) {
         if (referenceMedian !== null) {
-          throw 'There can only be one test with .referenceElement = true!';
+          throw new Error('There can only be one test with .referenceElement = true!');
         }
         referenceMedian = testsWithResults[index].result.timeMedian;
       }
@@ -302,7 +301,8 @@ export default class PerformanceTester {
     referenceMedian = referenceMedian || testsWithResults[0].result.timeMedian;
 
     testsWithResults.forEach((test, index) => {
-      testsWithResults[index].result.timePercentage = 100 / referenceMedian * test.result.timeMedian;
+      const timePercentage = (100 / referenceMedian) * test.result.timeMedian;
+      testsWithResults[index].result.timePercentage = timePercentage;
     });
 
     return testsWithResults;
