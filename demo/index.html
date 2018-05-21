@@ -12,21 +12,11 @@
   <script type="module">
     import WcPerformanceTester from '../WcPerformanceTester.js';
 
-    const tester = new WcPerformanceTester({ rootNode: document.querySelector('#tester') });
-    tester.rootUrl = '../';
-    // tester.sequence = '1-10;11-20[2,5];20-100[1,30]';
-    tester.sequence = '1-10[2,5]';
-
-    tester.add({
-      name: 'Reference Element',
-      referenceElement: true,
-      initHtml: `
-        <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-lite.js"></${'script'}>
-        <link rel="import" href="../reference-element.html">
-      `,
-      testHtml: `
-        <reference-element></reference-element>
-      `,
+    const tester = new WcPerformanceTester({
+      rootNode: document.querySelector('#tester'),
+      rootUrl: '../',
+      // sequence: '1-10;11-20[2,5];20-100[1,30]',
+      sequence: '1-10[2,5]',
     });
 
     tester.add({

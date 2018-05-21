@@ -89,14 +89,12 @@ export default class PerformanceTester {
   }
 
   constructor(options) {
-    const optionsWithDefaults = Object.assign({}, {
+    this.setOptions(options, {
       sequence: '1-10;11-20[2,5];20-100[1,30]',
       rootUrl: '../node_modules/@d4kmor/performance-tester',
       tests: [],
-    }, options);
+    });
     this._running = null;
-
-    Object.assign(this, optionsWithDefaults);
 
     if (this.rootNode) {
       this.rootNode.innerHTML = `
@@ -123,6 +121,13 @@ export default class PerformanceTester {
       this.graphSetup = false;
       this.graphTraceSetup = { 0: true };
     }
+  }
+
+  setOptions(options, defaults) {
+    const optionsWithDefaults = Object.assign({}, defaults, options);
+    this._running = null;
+
+    Object.assign(this, optionsWithDefaults);
   }
 
   add(test) {
@@ -155,6 +160,7 @@ export default class PerformanceTester {
   }
 
   static renderSummary(node, tests) {
+    // eslint-disable-next-line no-param-reassign
     node.innerHTML = `
       <table>
         <tr>

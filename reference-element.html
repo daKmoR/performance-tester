@@ -15,7 +15,7 @@
     connectedCallback() {
       this.shadowRoot.innerHTML = '<h1>In Shadow Dom</h1><slot></slot>';
       this.innerHTML = '<p>In Light Dom</p>';
-      this.constructor.sleep(15);
+      this.constructor.sleep(5);
     }
   }
   customElements.define('reference-element', ReferenceElement);
