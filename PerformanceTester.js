@@ -199,9 +199,11 @@ export default class PerformanceTester {
 
   async executeTestRuns(test, { repeats = 1, multiplyHtml = 1 } = { repeats: 1, multiplyHtml: 1 }) {
     const results = [];
+    this._currentRawResults = null;
     for (let i = 0; i < repeats; i += 1) {
       const result = await this.executeTestRun(test, multiplyHtml);
       results.push(result);
+      this._currentRawResults = results;
       if (this._running === false) {
         return results;
       }
@@ -279,30 +281,44 @@ export default class PerformanceTester {
   }
 
   addSingleTestToGraph(result, options) {
+    if (this.sequence.indexOf('-') === -1) {
+      const graphY = this._currentRawResults ? this._currentRawResults.length + 1 : 1;
+      this.graphAddNewPoint(options.trace, graphY, result.duration, options.test.name);
+    } else {
+      this.graphAddNewPoint(
+        options.trace,
+        options.multiplyHtml,
+        result.duration,
+        options.test.name,
+      );
+    }
+  }
+
+  graphAddNewPoint(trace, x, y, name = '') {
     if (typeof Plotly === 'undefined') { return; }
     if (!this.graphSetup) {
       Plotly.newPlot(this.graphNode, [{
-        x: [options.multiplyHtml],
-        y: [result.duration],
+        x: [x],
+        y: [y],
         mode: 'lines+markers',
         type: 'scatter',
-        name: options.test.name,
+        name,
       }], {});
       this.graphSetup = true;
-    } else if (!this.graphTraceSetup[options.trace]) {
+    } else if (!this.graphTraceSetup[trace]) {
       Plotly.addTraces(this.graphNode, {
-        x: [options.multiplyHtml],
-        y: [result.duration],
+        x: [x],
+        y: [y],
         mode: 'lines+markers',
         type: 'scatter',
-        name: options.test.name,
+        name,
       });
-      this.graphTraceSetup[options.trace] = true;
+      this.graphTraceSetup[trace] = true;
     } else {
       Plotly.extendTraces(this.graphNode, {
-        x: [[options.multiplyHtml]],
-        y: [[result.duration]],
-      }, [options.trace]);
+        x: [[x]],
+        y: [[y]],
+      }, [trace]);
     }
   }
 
@@ -350,17 +366,4 @@ export default class PerformanceTester {
 
     return testsWithResults;
   }
-
-  //   test.rawResults = {
-  //     10: [
-  //       {
-  //         time: 105,
-  //         memory: {}
-  //       },
-  //       {
-  //         time: 95,
-  //         memory: {}
-  //       }
-  //     ]
-  //   };
 }
