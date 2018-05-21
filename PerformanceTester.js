@@ -93,6 +93,7 @@ export default class PerformanceTester {
       sequence: '1-10;11-20[2,5];20-100[1,30]',
       rootUrl: '../node_modules/@d4kmor/performance-tester',
       tests: [],
+      includeInitTime: false,
     });
     this._running = null;
 
@@ -179,9 +180,9 @@ export default class PerformanceTester {
           <tr>
             <td>${test.name}</td>
             <td>${test.result ? `${test.result.timePercentage.toFixed(2)}%` : '-'}</td>
-            <td>${test.result ? `${test.result.timeMedian.toFixed(2)}%` : '-'}</td>
-            <td>${test.result ? `${test.result.timeAvg.toFixed(2)}%` : '-'}</td>
-            <td>${test.result ? `${test.result.timeStandardDeviation.toFixed(2)}%` : '-'}</td>
+            <td>${test.result ? `${test.result.timeMedian.toFixed(2)}ms` : '-'}</td>
+            <td>${test.result ? `${test.result.timeAvg.toFixed(2)}ms` : '-'}</td>
+            <td>${test.result ? `${test.result.timeStandardDeviation.toFixed(2)}` : '-'}</td>
           </tr>
         `).join('')}
       </table>
@@ -214,10 +215,18 @@ export default class PerformanceTester {
   async executeTestRun(test, multiplyHtml = 1) {
     await this.setupIframe();
 
+    let start;
+    if (this.includeInitTime === true) {
+      start = performance.now();
+    }
+
     test.initHtml = test.initHtml || ''; // eslint-disable-line no-param-reassign
     await this.testInit(test.initHtml);
 
-    const start = performance.now();
+    if (this.includeInitTime === false) {
+      start = performance.now();
+    }
+
     await this.testWrite(test.testHtml, multiplyHtml);
 
     const end = performance.now();
