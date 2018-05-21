@@ -134,6 +134,11 @@ export default class PerformanceTester {
     const testToAdd = test;
     testToAdd.trace = testToAdd.trace || this.tests.length;
     this.tests.push(testToAdd);
+    this._onTestsChanged();
+  }
+
+  _onTestsChanged() {
+    this.showSummary();
   }
 
   start() {
@@ -173,10 +178,10 @@ export default class PerformanceTester {
         ${tests.map(test => `
           <tr>
             <td>${test.name}</td>
-            <td>${test.result.timePercentage.toFixed(2)} %</td>
-            <td>${test.result.timeMedian.toFixed(2)} ms</td>
-            <td>${test.result.timeAvg.toFixed(2)} ms</td>
-            <td>${test.result.timeStandardDeviation.toFixed(2)}</td>
+            <td>${test.result ? `${test.result.timePercentage.toFixed(2)}%` : '-'}</td>
+            <td>${test.result ? `${test.result.timeMedian.toFixed(2)}%` : '-'}</td>
+            <td>${test.result ? `${test.result.timeAvg.toFixed(2)}%` : '-'}</td>
+            <td>${test.result ? `${test.result.timeStandardDeviation.toFixed(2)}%` : '-'}</td>
           </tr>
         `).join('')}
       </table>

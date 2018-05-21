@@ -47,6 +47,7 @@ export default class WcPerformanceTester extends PerformanceTester {
     } else {
       this.tests.push(testToAdd);
     }
+    this._onTestsChanged();
   }
 
   testInit(initHtml) {
