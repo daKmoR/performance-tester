@@ -46,7 +46,7 @@ export default class PerformanceTester {
    *
    *  will result in something like this
    *
-   *    this.patchRuns = [
+   *    this._runs = [
    *      { repeats: 2, multiplyHtml: 10, },
    *      { repeats: 2, multiplyHtml: 20, }
    *    ];
@@ -54,7 +54,7 @@ export default class PerformanceTester {
   set sequence(sequence) {
     this.__sequence = sequence;
 
-    const newPatchRuns = [];
+    const newRuns = [];
     const parts = this.__sequence.split(';');
     parts.forEach((rawPart) => {
       let repeats = 1;
@@ -75,13 +75,14 @@ export default class PerformanceTester {
       const step = Math.floor(((end - start) + 1) / multiplySpread);
       let i = step > 1 ? (start - 1) + step : start;
       while (i <= end) {
-        newPatchRuns.push({ repeats, multiplyHtml: i });
+        newRuns.push({ repeats, multiplyHtml: i });
         i += step;
         if (step === 0) { break; }
       }
     });
 
-    this.patchRuns = newPatchRuns;
+    this._runs = newRuns;
+    this.renderSummary();
   }
 
   get sequence() {
@@ -99,9 +100,27 @@ export default class PerformanceTester {
 
     if (this.rootNode) {
       this.rootNode.innerHTML = `
-        <h1>Tester</h1>
+        <h1>Performance Tester</h1>
         <button id="start">start</button>
         <button id="stop">stop</button>
+        <p>
+          <label>Sequence <small>'Range[Repeats,Split]'</small>:
+            <input id="sequence" type="text" value="${this.sequence}" />
+          </label>
+          <i>Examples:</i>
+          <select id="sequenceExamples">
+            <option>-</option>
+            <option>1-10</option>
+            <option>1[20]</option>
+            <option>1-100[1,30]</option>
+            <option>1-10;11-20[2,5];20-100[1,30]</option>
+          </select>
+          <br />
+          <label>Include Init Time:
+            <input id="includeInitTime" type="checkbox" ${this.includeInitTime ? 'checked' : ''} />
+          </label>
+        </p>
+
         <div id="summery"></div>
         <div id="graph"></div>
       `;
@@ -113,6 +132,22 @@ export default class PerformanceTester {
       this.stopButton = this.rootNode.querySelector('#stop');
       this.stopButton.addEventListener('click', () => {
         this.stop();
+      });
+
+      this.sequenceInput = this.rootNode.querySelector('#sequence');
+      this.sequenceInput.addEventListener('input', () => {
+        this.sequence = this.sequenceInput.value;
+      });
+
+      this.sequenceExamples = this.rootNode.querySelector('#sequenceExamples');
+      this.sequenceExamples.addEventListener('change', () => {
+        this.sequenceInput.value = this.sequenceExamples.value;
+        this.sequence = this.sequenceInput.value;
+      });
+
+      this.includeInitTimeCheckbox = this.rootNode.querySelector('#includeInitTime');
+      this.includeInitTimeCheckbox.addEventListener('change', () => {
+        this.includeInitTime = this.includeInitTimeCheckbox.checked;
       });
 
       this.summeryNode = this.rootNode.querySelector('#summery');
@@ -139,7 +174,7 @@ export default class PerformanceTester {
   }
 
   _onTestsChanged() {
-    this.showSummary();
+    this.renderSummary();
   }
 
   start() {
@@ -153,21 +188,31 @@ export default class PerformanceTester {
 
   async executeSuite() {
     for (let i = 0; i < this.tests.length; i += 1) {
-      this.tests[i].rawResults = await this.executeTest(this.tests[i], this.patchRuns);
+      this.tests[i].rawResults = await this.executeTest(this.tests[i], this._runs);
     }
     this.tests = this.constructor.calculateResults(this.tests);
-    this.showSummary();
+    this.renderSummary();
   }
 
-  showSummary() {
-    if (this.summeryNode) {
-      this.constructor.renderSummary(this.summeryNode, this.tests);
-    }
-  }
-
-  static renderSummary(node, tests) {
+  renderSummary() {
+    if (!this.summeryNode) { return; }
     // eslint-disable-next-line no-param-reassign
-    node.innerHTML = `
+    const stats = {
+      testCaseCount: this.tests.length,
+    };
+    stats.runsPerTestCase = this._runs.reduce((total, item) => total + item.repeats, 0);
+    stats.runsOverall = stats.runsPerTestCase * stats.testCaseCount;
+
+    stats.instancesPerTestCase = this._runs.reduce((total, item) => total + item.multiplyHtml, 0);
+    stats.instancesRangePerTestCase = this._runs.reduce((total, item) => `${total}, ${item.multiplyHtml}`, '').substr(2);
+    stats.instanceOverall = stats.instancesPerTestCase * stats.testCaseCount;
+
+    this.summeryNode.innerHTML = `
+      <p>
+        You are going to run ${stats.runsOverall} Tests. (${stats.testCaseCount} Tests Cases x ${stats.runsPerTestCase} Runs) <br />
+        Which will result in ${stats.instanceOverall} Elements rendered. <br />
+        (${stats.testCaseCount} Tests Cases x MultiplyHtml ${stats.instancesRangePerTestCase})
+      </p>
       <table>
         <tr>
           <th>Test Name</th>
@@ -176,7 +221,7 @@ export default class PerformanceTester {
           <th>Average</th>
           <th>Standard Deviation</th>
         </tr>
-        ${tests.map(test => `
+        ${this.tests.map(test => `
           <tr>
             <td>${test.name}</td>
             <td>${test.result ? `${test.result.timePercentage.toFixed(2)}%` : '-'}</td>
