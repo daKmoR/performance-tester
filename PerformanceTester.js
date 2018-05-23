@@ -97,12 +97,15 @@ export default class PerformanceTester {
       includeInitTime: false,
     });
     this._running = null;
+    this._round = 1;
+    this._firstStart = true;
 
     if (this.rootNode) {
       this.rootNode.innerHTML = `
         <h1>Performance Tester</h1>
-        <button id="start">start</button>
+        <button id="start">start/add round</button>
         <button id="stop">stop</button>
+        <button id="reset">reset</button>
         <p>
           <label>Sequence <small>'Range[Repeats,Split]'</small>:
             <input id="sequence" type="text" value="${this.sequence}" />
@@ -132,6 +135,9 @@ export default class PerformanceTester {
       this.stopButton = this.rootNode.querySelector('#stop');
       this.stopButton.addEventListener('click', () => {
         this.stop();
+      });
+      this.rootNode.querySelector('#reset').addEventListener('click', () => {
+        this.reset();
       });
 
       this.sequenceInput = this.rootNode.querySelector('#sequence');
@@ -179,15 +185,58 @@ export default class PerformanceTester {
 
   start() {
     this._running = true;
-    this.executeSuite();
+
+    if (this._firstStart) {
+      this.executeSuite();
+      this._firstStart = false;
+    } else {
+      const start = this.tests.length || 0;
+      this.tests.forEach((test) => {
+        if (!test.copiedTest) {
+          this.add({
+            name: `[${this._round}]: ${test.name}`,
+            initHtml: test.initHtml,
+            testHtml: test.testHtml,
+            copiedTest: true,
+          });
+        }
+      });
+      this.executeSuite(start);
+      this._round += 1;
+    }
   }
 
   stop() {
     this._running = false;
   }
 
-  async executeSuite() {
-    for (let i = 0; i < this.tests.length; i += 1) {
+  reset() {
+    const maxTrace = this.tests.reduce((prev, test) => (test.trace > prev ? test.trace : prev), 0);
+    for (let i = maxTrace; i >= 0; i -= 1) {
+      Plotly.deleteTraces(this.graphNode, i);
+    }
+
+    this.tests.sort((a, b) => a.trace - b.trace);
+    this.tests.forEach((test, index) => {
+      if (test.copiedTest) {
+        delete this.tests[index];
+      } else {
+        delete this.tests[index].rawResults;
+        delete this.tests[index].result;
+      }
+    });
+    this.tests = this.tests.filter(n => n !== undefined);
+
+    this._round = 1;
+    this._firstStart = true;
+    this.graphSetup = false;
+    this.graphTraceSetup = { 0: true };
+
+    this.renderSummary();
+  }
+
+  async executeSuite(start = 0) {
+    for (let i = start; i < this.tests.length; i += 1) {
       this.tests[i].rawResults = await this.executeTest(this.tests[i], this._runs);
     }
     this.tests = this.constructor.calculateResults(this.tests);
