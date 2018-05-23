@@ -269,18 +269,33 @@ export default class PerformanceTester {
           <th>Median</th>
           <th>Average</th>
           <th>Standard Deviation</th>
+          <th><th>
         </tr>
-        ${this.tests.map(test => `
+        ${this.tests.map((test, index) => `
           <tr>
             <td>${test.name}</td>
             <td>${test.result ? `${test.result.timePercentage.toFixed(2)}%` : '-'}</td>
             <td>${test.result ? `${test.result.timeMedian.toFixed(2)}ms` : '-'}</td>
             <td>${test.result ? `${test.result.timeAvg.toFixed(2)}ms` : '-'}</td>
             <td>${test.result ? `${test.result.timeStandardDeviation.toFixed(2)}` : '-'}</td>
+            <td><button class="redo" data-array-id="${index}" data-trace="${test.trace}" ${test.result ? '' : 'disabled'}>redo</button></td>
           </tr>
         `).join('')}
       </table>
     `;
+
+    Array.from(this.summeryNode.querySelectorAll('.redo')).forEach((button) => {
+      button.addEventListener('click', async (ev) => {
+        const { arrayId, trace } = ev.target.dataset;
+
+        Plotly.deleteTraces(this.graphNode, parseInt(trace, 10));
+        this.graphTraceSetup[trace] = false;
+
+        this.tests[arrayId].rawResults = await this.executeTest(this.tests[arrayId], this._runs);
+        this.tests = this.constructor.calculateResults(this.tests);
+        this.renderSummary();
+      });
+    });
   }
 
   async executeTest(test, runs = [{ repeats: 1, multiplyHtml: 1 }]) {
@@ -415,7 +430,7 @@ export default class PerformanceTester {
         mode: 'lines+markers',
         type: 'scatter',
         name,
-      });
+      }, trace);
       this.graphTraceSetup[trace] = true;
     } else {
       Plotly.extendTraces(this.graphNode, {
